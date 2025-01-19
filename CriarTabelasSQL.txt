@@ -1,0 +1,137 @@
+-- Table: public.CID
+
+-- DROP TABLE IF EXISTS public."CID";
+
+CREATE TABLE IF NOT EXISTS public."CID"
+(
+    "CAUSA_COD" character varying(4) COLLATE pg_catalog."default" NOT NULL,
+    "DESCRICAO" character varying(270) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "CID_pkey" PRIMARY KEY ("CAUSA_COD")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."CID"
+    OWNER to postgres;
+
+
+-- Table: public.MUNICIPIO
+
+-- DROP TABLE IF EXISTS public."MUNICIPIO";
+
+CREATE TABLE IF NOT EXISTS public."MUNICIPIO"
+(
+    "COD_MUN" character varying(7) COLLATE pg_catalog."default" NOT NULL,
+    "MUNICIPIO" character varying(40) COLLATE pg_catalog."default",
+    "UF" character varying(2) COLLATE pg_catalog."default" NOT NULL,
+    "REGIAO" character varying(15) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "MUNICIPIO_pkey" PRIMARY KEY ("COD_MUN")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."MUNICIPIO"
+    OWNER to postgres;
+
+
+
+-- Table: public.GESTAO_HOSPITALAR
+
+-- DROP TABLE IF EXISTS public."GESTAO_HOSPITALAR";
+
+CREATE TABLE IF NOT EXISTS public."GESTAO_HOSPITALAR"
+(
+    "TIPO_GESTAO" character(1) COLLATE pg_catalog."default" NOT NULL,
+    "DESCRICAO" character varying(20) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "GESTAO_HOSPITALAR_pkey" PRIMARY KEY ("TIPO_GESTAO")
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."GESTAO_HOSPITALAR"
+    OWNER to postgres;
+
+
+-- Table: public.ESTABELECIMENTO_DE_SAUDE
+
+-- DROP TABLE IF EXISTS public."ESTABELECIMENTO_DE_SAUDE";
+
+CREATE TABLE IF NOT EXISTS public."ESTABELECIMENTO_DE_SAUDE"
+(
+    "CNES" character varying(7) COLLATE pg_catalog."default" NOT NULL,
+    "NOME_ESTABELECIMENTO" character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    "TIPO_UNIDADE" character varying(255) COLLATE pg_catalog."default" NOT NULL,
+    "LEITOS_EXISTENTE" integer NOT NULL,
+    "LEITOS_SUS" integer NOT NULL,
+    "COD_MUN" character varying(20) COLLATE pg_catalog."default" NOT NULL,
+    "TIPO_GESTAO" character varying(50) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "ESTABELECIMENTO_DE_SAUDE_pkey" PRIMARY KEY ("CNES"),
+    CONSTRAINT "ESTABELECIMENTO_DE_SAUDE_COD_MUN_fkey" FOREIGN KEY ("COD_MUN")
+        REFERENCES public."MUNICIPIO" ("COD_MUN") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE RESTRICT,
+    CONSTRAINT "ESTABELECIMENTO_DE_SAUDE_TIPO_GESTAO_fkey" FOREIGN KEY ("TIPO_GESTAO")
+        REFERENCES public."GESTAO_HOSPITALAR" ("TIPO_GESTAO") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE RESTRICT
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."ESTABELECIMENTO_DE_SAUDE"
+    OWNER to postgres;
+
+
+
+
+-- Table: public.OBITOS
+
+-- DROP TABLE IF EXISTS public."OBITOS";
+
+CREATE TABLE IF NOT EXISTS public."OBITOS"
+(
+    "COD_MOR" character varying(7) COLLATE pg_catalog."default" NOT NULL,
+    "CNES" character varying(7) COLLATE pg_catalog."default",
+    "TIPO_IDADE" integer,
+    "IDADE" integer,
+    "SEXO" character(1) COLLATE pg_catalog."default",
+    "DATA_OBITO" date,
+    "COD_MUN" character varying(7) COLLATE pg_catalog."default",
+    CONSTRAINT "OBITOS_pkey" PRIMARY KEY ("COD_MOR"),
+    CONSTRAINT "OBITOS_CNES_fkey" FOREIGN KEY ("CNES")
+        REFERENCES public."ESTABELECIMENTO_DE_SAUDE" ("CNES") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE SET NULL,
+    CONSTRAINT "OBITOS_COD_MUN_fkey" FOREIGN KEY ("COD_MUN")
+        REFERENCES public."MUNICIPIO" ("COD_MUN") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE RESTRICT
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."OBITOS"
+    OWNER to postgres;
+
+
+
+-- Table: public.CAUSA_OBITOS
+
+-- DROP TABLE IF EXISTS public."CAUSA_OBITOS";
+
+CREATE TABLE IF NOT EXISTS public."CAUSA_OBITOS"
+(
+    "COD_MOR" character varying(7) COLLATE pg_catalog."default" NOT NULL,
+    "CAUSA_COD" character varying(8) COLLATE pg_catalog."default" NOT NULL,
+    CONSTRAINT "CAUSA_OBITOS_PK" PRIMARY KEY ("COD_MOR", "CAUSA_COD"),
+    CONSTRAINT "CAUSA_OBITOS_CAUSA_COD_fkey" FOREIGN KEY ("CAUSA_COD")
+        REFERENCES public."CID" ("CAUSA_COD") MATCH SIMPLE
+        ON UPDATE NO ACTION
+        ON DELETE RESTRICT
+)
+
+TABLESPACE pg_default;
+
+ALTER TABLE IF EXISTS public."CAUSA_OBITOS"
+    OWNER to postgres;
+
